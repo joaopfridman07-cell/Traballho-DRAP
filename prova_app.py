@@ -7,7 +7,7 @@ def configurar_banco():
     conexao = sqlite3.connect("sistema_provas.db")
     cursor = conexao.cursor()
 
-    
+
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS questoes (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -17,7 +17,7 @@ def configurar_banco():
         )
     """)
 
-    
+
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS notas (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -26,7 +26,7 @@ def configurar_banco():
         )
     """)
 
-   
+
     cursor.execute("SELECT COUNT(*) FROM questoes")
     if cursor.fetchone()[0] == 0:
         questoes_exemplo = [
@@ -42,8 +42,8 @@ def configurar_banco():
     conexao.close()
 
 
-respostas_aluno = [] 
-gabarito = []        
+respostas_aluno = []
+gabarito = []
 
 def iniciar_prova():
     nome = entry_nome.get().strip()
@@ -51,29 +51,29 @@ def iniciar_prova():
         messagebox.showwarning("Aviso", "Digite o nome do aluno primeiro!")
         return
 
-    
+
     for widget in frame_questoes.winfo_children():
         widget.destroy()
-    
+
     respostas_aluno.clear()
     gabarito.clear()
 
-    
+
     conexao = sqlite3.connect("sistema_provas.db")
     cursor = conexao.cursor()
     cursor.execute("SELECT * FROM questoes ORDER BY RANDOM() LIMIT 3")
     questoes_sorteadas = cursor.fetchall()
     conexao.close()
 
-    
+
     for i, q in enumerate(questoes_sorteadas):
-        
+
         tk.Label(frame_questoes, text=f"{i+1}) {q[1]}", font=("Arial", 10, "bold")).pack(anchor="w", pady=(10, 0))
 
-        var_resposta = tk.StringVar(value="X") 
+        var_resposta = tk.StringVar(value="X")
         respostas_aluno.append(var_resposta)
-        gabarito.append(q[6]) 
-        
+        gabarito.append(q[6])
+
         tk.Radiobutton(frame_questoes, text=q[2], variable=var_resposta, value="A").pack(anchor="w")
         tk.Radiobutton(frame_questoes, text=q[3], variable=var_resposta, value="B").pack(anchor="w")
         tk.Radiobutton(frame_questoes, text=q[4], variable=var_resposta, value="C").pack(anchor="w")
@@ -85,10 +85,10 @@ def finalizar_prova():
     nome = entry_nome.get().strip()
     nota = 0
 
-    
+
     for i in range(3):
         if respostas_aluno[i].get() == gabarito[i]:
-            nota += 1 
+            nota += 1
 
     conexao = sqlite3.connect("sistema_provas.db")
     cursor = conexao.cursor()
@@ -97,14 +97,14 @@ def finalizar_prova():
     conexao.close()
 
     messagebox.showinfo("Resultado", f"Prova finalizada!\nAluno: {nome}\nNota: {nota} de 3")
-    
+
     entry_nome.delete(0, tk.END)
     for widget in frame_questoes.winfo_children():
         widget.destroy()
     btn_finalizar.pack_forget()
 
 def exportar_txt():
-    
+
     conexao = sqlite3.connect("sistema_provas.db")
     cursor = conexao.cursor()
     cursor.execute("SELECT nome_aluno, nota FROM notas")
@@ -161,4 +161,8 @@ btn_finalizar = tk.Button(janela, text="Finalizar Prova e Corrigir", command=fin
 
 tk.Button(janela, text="Exportar Notas para TXT", command=exportar_txt, bg="lightblue").pack(side="bottom", pady=20)
 
+botao_sair = tk.Button(janela,text="Sair",bg="red",fg="white",width=10,command=janela.destroy)
+botao_sair.pack(pady=20)
+
 janela.mainloop()
+
